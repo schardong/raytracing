@@ -16,6 +16,6 @@ public:
 private:
   glm::vec3 m_origin;
   glm::vec3 m_direction;
-}
+};
 
 #endif /* RAY_H */
