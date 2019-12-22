@@ -6,18 +6,24 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
-/*
-#define STB_IMAGE_IMPLEMENTATION
-extern "C" {
-#include "stb_image.h"
-#include "stb_image_write.h"
-}
-*/
-
 #include "ray.h"
+
+bool hit_sphere(const glm::vec3& center, const float radius, const Ray& r)
+{
+  glm::vec3 oc = r.origin() - center;
+
+  float a = glm::dot(r.direction(), r.direction());
+  float b = 2.f * glm::dot(oc, r.direction());
+  float c = glm::dot(oc, oc) - radius * radius;
+  float discriminant = b * b - 4 * a * c;
+  return discriminant > 0;
+}
 
 glm::vec3 color(const Ray& r)
 {
+  if (hit_sphere(glm::vec3(0, 0, -1), 0.5f, r))
+    return glm::vec3(1.f, 0.f, 0.f);
+
   glm::vec3 unit_dir = glm::normalize(r.direction());
   float t = 0.5f * (unit_dir.y + 1.0f);
   return (1.f - t) * glm::vec3(1.f) + t * glm::vec3(0.3f, 0.7f, 1.f);
@@ -74,12 +80,5 @@ int main(int argc, char** argv)
 
   to_ppm(img_data, nx, ny, N_CHANNELS);
 
-  /*
-  char fname[256] = "image.png";
-  if (argc > 4)
-    strcpy(fname, argv[4]);
-
-  stbi_write_png(fname, nx, ny, 4, img_data.data(), 0);
-  */
   return 0;
 }
