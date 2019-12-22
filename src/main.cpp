@@ -8,34 +8,45 @@
 
 #include "ray.h"
 
-bool hit_sphere(const glm::vec3& center, const float radius, const Ray& r)
+using std::cout;
+using std::endl;
+using std::vector;
+
+float hit_sphere(const glm::vec3& center, const float radius, const Ray& r)
 {
   glm::vec3 oc = r.origin() - center;
 
   float a = glm::dot(r.direction(), r.direction());
   float b = 2.f * glm::dot(oc, r.direction());
   float c = glm::dot(oc, oc) - radius * radius;
-  float discriminant = b * b - 4 * a * c;
-  return discriminant > 0;
+  float discriminant = b * b - 4.f * a * c;
+
+  if (discriminant < 0.f)
+    return -1.f;
+  else
+    return (-b - sqrt(discriminant) / (2.f * a));
 }
 
 glm::vec3 color(const Ray& r)
 {
-  if (hit_sphere(glm::vec3(0, 0, -1), 0.5f, r))
-    return glm::vec3(1.f, 0.f, 0.f);
+  float t = hit_sphere(glm::vec3(0.f, 0.f, -1.f), 0.5f, r);
+  if (t > 0.f) {
+    glm::vec3 N = glm::normalize(r.p(t) - glm::vec3(0.f, 0.f, -1.f));
+    return 0.5f * (N + 1.f);
+  }
 
   glm::vec3 unit_dir = glm::normalize(r.direction());
-  float t = 0.5f * (unit_dir.y + 1.0f);
-  return (1.f - t) * glm::vec3(1.f) + t * glm::vec3(0.3f, 0.7f, 1.f);
+  t = 0.5f * (unit_dir.y + 1.f);
+  return (1.f - t) * glm::vec3(1.f) + t * glm::vec3(0.5f, 0.7f, 1.f);
 }
 
 void to_ppm(const std::vector<int>& data, size_t w, size_t h, size_t n_channels=3)
 {
-  std::cout << "P3\n" << w << " " << h << "\n255\n";
+  cout << "P3\n" << w << " " << h << "\n255" << endl;
   for (size_t i = 0; i < data.size(); i += n_channels) {
     for (size_t c = 0; c < n_channels; ++c)
-      std::cout << data[i+c] << " ";
-    std::cout << std::endl;
+      cout << data[i+c] << " ";
+    cout << endl;
   }
 }
 
@@ -58,7 +69,7 @@ int main(int argc, char** argv)
   glm::vec3 horizontal(4.f, 0.f, 0.f);
   glm::vec3 vertical(0.f, 2.f, 0.f);
 
-  std::vector<int> img_data(nx * ny * N_CHANNELS);
+  vector<int> img_data(nx * ny * N_CHANNELS);
   for (int j = ny-1; j >= 0; --j) {
     for (int i = 0; i < nx; ++i) {
       float u = static_cast<float>(i) / static_cast<float>(nx);
