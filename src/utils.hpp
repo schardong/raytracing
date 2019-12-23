@@ -11,4 +11,16 @@ inline double rdouble() {
   return rand_generator();
 }
 
+inline glm::vec3 runit_sphere()
+{
+  using glm::vec3;
+  using glm::dot;
+
+  vec3 p;
+  do {
+    p = 2.f * vec3(rdouble(), rdouble(), rdouble()) - vec3(1.f);
+  } while (dot(p, p) >= 1.f);
+  return p;
+}
+
 #endif // UTILS_HPP

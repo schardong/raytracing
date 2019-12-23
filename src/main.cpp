@@ -21,8 +21,9 @@ using glm::vec3;
 glm::vec3 color(const Ray& r, const HitObject& world)
 {
   HitRecord rec;
-  if (world.hit(r, {0.f, std::numeric_limits<float>::max()}, rec)) {
-    return 0.5f * (rec.normal + 1.f);
+  if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
+    vec3 target = rec.p + rec.normal + runit_sphere();
+    return 0.5f * color(Ray(rec.p, target - rec.p), world);
   }
 
   vec3 unit_dir = glm::normalize(r.direction());
@@ -71,7 +72,8 @@ int main(int argc, char** argv)
         col += color(r, world);
       }
       col /= static_cast<float>(n_samples);
-      //      col = sqrt(col);
+      col = sqrt(col);
+
       int ir = static_cast<int>(255.99 * col.r);
       int ig = static_cast<int>(255.99 * col.g);
       int ib = static_cast<int>(255.99 * col.b);
