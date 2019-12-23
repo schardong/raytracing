@@ -1,10 +1,13 @@
 #include "sphere.h"
+#include "material.h"
 #include "hitrecord.h"
 #include "ray.h"
 
-Sphere::Sphere() : m_center(glm::vec3(0)), m_radius(1.f) {}
+Sphere::Sphere() : m_center(glm::vec3(0)), m_radius(1.f),
+                   m_material(new Lambertian(glm::vec3(0.f))) {}
 
-Sphere::Sphere(glm::vec3 center, float r) : m_center(center), m_radius(r) {}
+Sphere::Sphere(glm::vec3 center, float r, Material* mat) :
+  m_center(center), m_radius(r), m_material(mat) {}
 
 bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) const
 {
@@ -23,6 +26,7 @@ bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) co
       rec.t = x1;
       rec.p = r.p(x1);
       rec.normal = (rec.p - m_center) / m_radius;
+      rec.material = m_material;
       return true;
     }
 
@@ -31,6 +35,7 @@ bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) co
       rec.t = x2;
       rec.p = r.p(x2);
       rec.normal = (rec.p - m_center) / m_radius;
+      rec.material = m_material;
       return true;
     }
   }

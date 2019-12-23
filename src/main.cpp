@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 
 #include "camera.h"
+#include "material.h"
 #include "hitrecord.h"
 #include "hitobjectlist.h"
 #include "ray.h"
@@ -18,12 +19,18 @@ using std::endl;
 using std::vector;
 using glm::vec3;
 
-glm::vec3 color(const Ray& r, const HitObject& world)
+vec3 color(const Ray& r, const HitObject& world, int depth)
 {
   HitRecord rec;
   if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
-    vec3 target = rec.p + rec.normal + runit_sphere();
-    return 0.5f * color(Ray(rec.p, target - rec.p), world);
+    Ray scattered;
+    vec3 attenuation;
+
+    if (depth < 50 && rec.material->scatter(r, rec, attenuation, scattered)) {
+      return attenuation * color(scattered, world, depth + 1);
+    } else {
+      return vec3(0.f);
+    }
   }
 
   vec3 unit_dir = glm::normalize(r.direction());
@@ -56,8 +63,10 @@ int main(int argc, char** argv)
     n_samples = atoi(argv[3]);
 
   HitObjectList world;
-  world.pushObject(new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f));
-  world.pushObject(new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f));
+  world.pushObject(new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(vec3(0.8f, 0.3f, 0.3f))));
+  world.pushObject(new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, new Lambertian(vec3(0.8f, 0.8f, 0.0f))));
+  world.pushObject(new Sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f, 0.6f, 0.2f))));
+  world.pushObject(new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f))));
 
   Camera cam;
   vector<int> img_data(nx * ny * N_CHANNELS);
@@ -69,7 +78,7 @@ int main(int argc, char** argv)
         float u = static_cast<float>(i + rdouble()) / static_cast<float>(nx);
         float v = static_cast<float>(j + rdouble()) / static_cast<float>(ny);
         Ray r = cam.getRay(u, 1 - v);
-        col += color(r, world);
+        col += color(r, world, 0);
       }
       col /= static_cast<float>(n_samples);
       col = sqrt(col);

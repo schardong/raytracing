@@ -23,4 +23,9 @@ inline glm::vec3 runit_sphere()
   return p;
 }
 
+inline glm::vec3 reflect(const glm::vec3& v, const glm::vec3& n)
+{
+  return v - 2 * glm::dot(v, n) * n;
+}
+
 #endif // UTILS_HPP
