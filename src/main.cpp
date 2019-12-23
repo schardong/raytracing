@@ -6,14 +6,17 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+#include "camera.h"
 #include "hitrecord.h"
 #include "hitobjectlist.h"
 #include "ray.h"
 #include "sphere.h"
+#include "utils.hpp"
 
 using std::cout;
 using std::endl;
 using std::vector;
+using glm::vec3;
 
 glm::vec3 color(const Ray& r, const HitObject& world)
 {
@@ -22,9 +25,9 @@ glm::vec3 color(const Ray& r, const HitObject& world)
     return 0.5f * (rec.normal + 1.f);
   }
 
-  glm::vec3 unit_dir = glm::normalize(r.direction());
+  vec3 unit_dir = glm::normalize(r.direction());
   float t = 0.5f * (unit_dir.y + 1.f);
-  return (1.f - t) * glm::vec3(1.f) + t * glm::vec3(0.5f, 0.7f, 1.f);
+  return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
 }
 
 void to_ppm(const std::vector<int>& data, size_t w, size_t h, size_t n_channels=3)
@@ -39,12 +42,10 @@ void to_ppm(const std::vector<int>& data, size_t w, size_t h, size_t n_channels=
 
 int main(int argc, char** argv)
 {
-  using glm::vec3;
-
   const int N_CHANNELS = 3;
-  int nx = 400;
-  int ny = 200;
-  int n_samples = 400;
+  int nx = 200;
+  int ny = 100;
+  int n_samples = 100;
 
   if (argc > 1)
     nx = atoi(argv[1]);
@@ -53,24 +54,24 @@ int main(int argc, char** argv)
   if (argc > 3)
     n_samples = atoi(argv[3]);
 
-  vec3 origin(0.f);
-  vec3 ll_corner(-2.f, -1.f, -1.f);
-  vec3 horizontal(4.f, 0.f, 0.f);
-  vec3 vertical(0.f, 2.f, 0.f);
-
   HitObjectList world;
   world.pushObject(new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f));
   world.pushObject(new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f));
 
+  Camera cam;
   vector<int> img_data(nx * ny * N_CHANNELS);
+
   for (int j = ny-1; j >= 0; --j) {
     for (int i = 0; i < nx; ++i) {
-      float u = static_cast<float>(i) / static_cast<float>(nx);
-      float v = static_cast<float>(j) / static_cast<float>(ny);
-
-      Ray r(origin, ll_corner + u * horizontal + v * vertical);
-
-      vec3 col = color(r, world);
+      vec3 col(0.f);
+      for (int s = 0; s < n_samples; ++s) {
+        float u = static_cast<float>(i + rdouble()) / static_cast<float>(nx);
+        float v = static_cast<float>(j + rdouble()) / static_cast<float>(ny);
+        Ray r = cam.getRay(u, 1 - v);
+        col += color(r, world);
+      }
+      col /= static_cast<float>(n_samples);
+      //      col = sqrt(col);
       int ir = static_cast<int>(255.99 * col.r);
       int ig = static_cast<int>(255.99 * col.g);
       int ib = static_cast<int>(255.99 * col.b);
