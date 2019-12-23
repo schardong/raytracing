@@ -6,37 +6,24 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+#include "hitrecord.h"
+#include "hitobjectlist.h"
 #include "ray.h"
+#include "sphere.h"
 
 using std::cout;
 using std::endl;
 using std::vector;
 
-float hit_sphere(const glm::vec3& center, const float radius, const Ray& r)
+glm::vec3 color(const Ray& r, const HitObject& world)
 {
-  glm::vec3 oc = r.origin() - center;
-
-  float a = glm::dot(r.direction(), r.direction());
-  float b = 2.f * glm::dot(oc, r.direction());
-  float c = glm::dot(oc, oc) - radius * radius;
-  float discriminant = b * b - 4.f * a * c;
-
-  if (discriminant < 0.f)
-    return -1.f;
-  else
-    return (-b - sqrt(discriminant) / (2.f * a));
-}
-
-glm::vec3 color(const Ray& r)
-{
-  float t = hit_sphere(glm::vec3(0.f, 0.f, -1.f), 0.5f, r);
-  if (t > 0.f) {
-    glm::vec3 N = glm::normalize(r.p(t) - glm::vec3(0.f, 0.f, -1.f));
-    return 0.5f * (N + 1.f);
+  HitRecord rec;
+  if (world.hit(r, {0.f, std::numeric_limits<float>::max()}, rec)) {
+    return 0.5f * (rec.normal + 1.f);
   }
 
   glm::vec3 unit_dir = glm::normalize(r.direction());
-  t = 0.5f * (unit_dir.y + 1.f);
+  float t = 0.5f * (unit_dir.y + 1.f);
   return (1.f - t) * glm::vec3(1.f) + t * glm::vec3(0.5f, 0.7f, 1.f);
 }
 
@@ -52,6 +39,8 @@ void to_ppm(const std::vector<int>& data, size_t w, size_t h, size_t n_channels=
 
 int main(int argc, char** argv)
 {
+  using glm::vec3;
+
   const int N_CHANNELS = 3;
   int nx = 400;
   int ny = 200;
@@ -64,10 +53,14 @@ int main(int argc, char** argv)
   if (argc > 3)
     n_samples = atoi(argv[3]);
 
-  glm::vec3 origin(0.f);
-  glm::vec3 ll_corner(-2.f, -1.f, -1.f);
-  glm::vec3 horizontal(4.f, 0.f, 0.f);
-  glm::vec3 vertical(0.f, 2.f, 0.f);
+  vec3 origin(0.f);
+  vec3 ll_corner(-2.f, -1.f, -1.f);
+  vec3 horizontal(4.f, 0.f, 0.f);
+  vec3 vertical(0.f, 2.f, 0.f);
+
+  HitObjectList world;
+  world.pushObject(new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f));
+  world.pushObject(new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f));
 
   vector<int> img_data(nx * ny * N_CHANNELS);
   for (int j = ny-1; j >= 0; --j) {
@@ -77,7 +70,7 @@ int main(int argc, char** argv)
 
       Ray r(origin, ll_corner + u * horizontal + v * vertical);
 
-      glm::vec3 col = color(r);
+      vec3 col = color(r, world);
       int ir = static_cast<int>(255.99 * col.r);
       int ig = static_cast<int>(255.99 * col.g);
       int ib = static_cast<int>(255.99 * col.b);
