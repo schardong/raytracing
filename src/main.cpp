@@ -65,8 +65,8 @@ int main(int argc, char** argv)
   HitObjectList world;
   world.pushObject(new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(vec3(0.8f, 0.3f, 0.3f))));
   world.pushObject(new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, new Lambertian(vec3(0.8f, 0.8f, 0.0f))));
-  world.pushObject(new Sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f, 0.6f, 0.2f))));
-  world.pushObject(new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f))));
+  world.pushObject(new Sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f, 0.6f, 0.2f), 0.8f)));
+  world.pushObject(new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f), 0.3f)));
 
   Camera cam;
   vector<int> img_data(nx * ny * N_CHANNELS);

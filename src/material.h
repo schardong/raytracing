@@ -28,11 +28,12 @@ private:
 class Metal: public Material
 {
 public:
-  Metal(glm::vec3 albedo);
+  Metal(glm::vec3 albedo, float fuzz = 0.f);
   virtual bool scatter(const Ray& r_in, const HitRecord& rec,
                        glm::vec3& attenuation, Ray& scattered) const;
 private:
   glm::vec3 m_albedo;
+  float m_fuzz;
 };
 
 #endif // MATERIAL_H
