@@ -9,7 +9,7 @@
 class Camera
 {
 public:
-  Camera();
+  Camera(float vfov, float aspect);
   Ray getRay(float u, float v);
 
 private:
