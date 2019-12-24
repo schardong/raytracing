@@ -24,6 +24,15 @@ inline vec3 runit_sphere()
   return p;
 }
 
+inline vec3 runit_disc()
+{
+  vec3 p;
+  do {
+    p = 2.f * vec3(rdouble(), rdouble(), 0.f) - vec3(1.f, 1.f, 0.f);
+  } while (dot(p, p) >= 1.f);
+  return p;
+}
+
 inline vec3 reflect(const vec3& v, const vec3& n)
 {
   return v - 2 * dot(v, n) * n;

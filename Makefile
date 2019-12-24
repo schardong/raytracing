@@ -3,7 +3,7 @@ ifneq ($(MAKECMDGOALS), release)
 	CXXFLAGS += -g3 -O0 -D_DEBUG
 else
 	CONFIG := release
-	CXXFLAGS += -g0 -O2 -DNDEBUG
+	CXXFLAGS += -g0 -O3
 endif
 
 CXXFLAGS += -std=c++17 -Iext -Isrc
