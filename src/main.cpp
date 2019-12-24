@@ -69,7 +69,8 @@ int main(int argc, char** argv)
   world.pushObject(new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Dielectric(1.5f)));
   world.pushObject(new Sphere(vec3(-1.0f, 0.0f, -1.0f), -0.45f, new Dielectric(1.5f)));
 
-  Camera cam(90, float(nx) / float(ny));
+  Camera cam(vec3(-2.f, 2.f, 1.f), vec3(0.f, 0.f, -1.f),
+             vec3(0.f, 1.f, 0.f), 30, float(nx) / float(ny));
   vector<int> img_data(nx * ny * N_CHANNELS);
 
   for (int j = ny-1; j >= 0; --j) {

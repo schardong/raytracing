@@ -9,7 +9,8 @@
 class Camera
 {
 public:
-  Camera(float vfov, float aspect);
+  Camera(glm::vec3 pos, glm::vec3 lookat, glm::vec3 up, float vfov,
+         float aspect);
   Ray getRay(float u, float v);
 
 private:
