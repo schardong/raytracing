@@ -29,3 +29,6 @@ rt: $(OBJS)
 
 test: rt
 	./rt 400 200 10 > image.ppm
+
+book1: rt
+	./rt 1400 1200 20 > book1_1400-1200-20.ppm
