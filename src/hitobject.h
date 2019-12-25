@@ -9,6 +9,7 @@ class Ray;
 class HitObject
 {
 public:
+  virtual ~HitObject() = default;
   virtual bool hit(const Ray& r, std::pair<float, float> t_lim,
                    HitRecord& rec) const = 0;
 };

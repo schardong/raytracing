@@ -2,12 +2,12 @@
 #include "ray.h"
 #include "hitrecord.h"
 
-HitObjectList::HitObjectList() {}
-
 HitObjectList::~HitObjectList()
 {
-  for (size_t i = 0; i < m_objects.size(); ++i)
-    delete m_objects[i];
+  for (auto it : m_objects) {
+    delete it;
+    it = nullptr;
+  }
   m_objects.clear();
 }
 

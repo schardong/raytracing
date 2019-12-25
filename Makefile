@@ -28,4 +28,4 @@ rt: $(OBJS)
 	$(CXX) -c -o $@ $(CXXFLAGS) $<
 
 test: rt
-	./rt 400 200 100 > image.ppm
+	./rt 400 200 10 > image.ppm

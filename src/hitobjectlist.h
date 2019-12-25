@@ -9,14 +9,14 @@ class HitRecord;
 class HitObjectList: public HitObject
 {
 public:
-  HitObjectList();
-  ~HitObjectList();
+  HitObjectList() = default;
+  virtual ~HitObjectList();
   virtual bool hit(const Ray &r, std::pair<float, float> t_lims,
                    HitRecord &rec) const;
-  void pushObject(HitObject *obj);
+  void pushObject(HitObject* obj);
 
 private:
-  std::vector<HitObject *> m_objects;
+  std::vector<HitObject*> m_objects;
 };
 
 #endif // HIT_OBJECT_LIST_H
