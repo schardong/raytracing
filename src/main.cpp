@@ -6,10 +6,12 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+#include "aabb.h"
+#include "bvhnode.h"
 #include "camera.h"
-#include "material.h"
 #include "hitrecord.h"
 #include "hitobjectlist.h"
+#include "material.h"
 #include "ray.h"
 #include "sphere.h"
 #include "utils.hpp"
@@ -18,6 +20,14 @@ using std::cout;
 using std::endl;
 using std::vector;
 using glm::vec3;
+
+typedef struct
+{
+  int nx;
+  int ny;
+  int n_channels;
+  std::vector<int> data;
+} ImgData;
 
 vec3 color(const Ray& r, const HitObject& world, int depth)
 {
@@ -38,10 +48,10 @@ vec3 color(const Ray& r, const HitObject& world, int depth)
   return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
 }
 
-HitObject* random_spheres()
+HitObject* random_spheres(bool with_bvh=false)
 {
-  HitObjectList* world = new HitObjectList;
-  world->pushObject(new Sphere(vec3(0.f, -1000.f, 0.f), 1000.f, new Lambertian(vec3(0.5f))));
+  std::vector<HitObject*> objs;
+  objs.push_back(new Sphere(vec3(0.f, -1000.f, 0.f), 1000.f, new Lambertian(vec3(0.5f))));
 
   for(int a = -11; a < 11; ++a) {
     for (int b = -11; b < 11; ++b) {
@@ -61,29 +71,75 @@ HitObject* random_spheres()
         } else {
           mat = new Dielectric(1.5f);
         }
-        world->pushObject(new Sphere(center, 0.2f, mat));
+        objs.push_back(new Sphere(center, 0.2f, mat));
       }
     }
   }
 
-  world->pushObject(new Sphere(vec3(0.f, 1.f, 0.f), 1.f, new Dielectric(1.5f)));
-  world->pushObject(new Sphere(vec3(-4.f, 1.f, 0.f), 1.f,
+  objs.push_back(new Sphere(vec3(0.f, 1.f, 0.f), 1.f, new Dielectric(1.5f)));
+  objs.push_back(new Sphere(vec3(-4.f, 1.f, 0.f), 1.f,
                                new Lambertian(vec3(0.4f, 0.2f, 0.1f))));
-  world->pushObject(new Sphere(vec3(4.f, 1.f, 0.f), 1.f,
+  objs.push_back(new Sphere(vec3(4.f, 1.f, 0.f), 1.f,
                                new Metal(vec3(0.7f, 0.6f, 0.5f), 0.f)));
+
+  if (with_bvh) {
+    BVHNode* root = new BVHNode(objs);
+    return root;
+  }
+
+  HitObjectList* world = new HitObjectList(objs);
   return world;
 }
 
-void to_ppm(const std::vector<int>& data, size_t w, size_t h, size_t n_channels=3)
+void to_ppm(ImgData& img)
 {
-  cout << "P3\n" << w << " " << h << "\n255" << endl;
-  for (size_t i = 0; i < data.size(); i += n_channels) {
-    for (size_t c = 0; c < n_channels; ++c)
-      cout << data[i+c] << " ";
+  if (img.data.empty()) {
+    throw std::runtime_error("No valid image data found.");
+    return;
+  }
+
+  int n_channels = img.n_channels;
+  cout << "P3\n" << img.nx << " " << img.ny << "\n255" << endl;
+  for (size_t i = 0; i < img.data.size(); i += img.n_channels) {
+    for (size_t c = 0; c < img.n_channels; ++c)
+      cout << img.data[i+c] << " ";
     cout << endl;
   }
 }
 
+void trace_full(HitObject* world, Camera& cam, ImgData& img_data,
+                int samples_per_pix)
+{
+  int nx = img_data.nx;
+  int ny = img_data.ny;
+  int n_channels = img_data.n_channels;
+  img_data.data = std::vector<int>(nx * ny * n_channels);
+
+  for (int j = ny - 1; j >= 0; --j) {
+    for (int i = 0; i < nx; ++i) {
+      vec3 col(0.f);
+      for (int s = 0; s < samples_per_pix; ++s) {
+        float u = static_cast<float>(i + rdouble()) / static_cast<float>(nx);
+        float v = static_cast<float>(j + rdouble()) / static_cast<float>(ny);
+        Ray r = cam.getRay(u, 1 - v);
+        col += color(r, *world, 0);
+      }
+      col /= static_cast<float>(samples_per_pix);
+      col = sqrt(col);
+
+      int ir = static_cast<int>(255.99 * col.r);
+      int ig = static_cast<int>(255.99 * col.g);
+      int ib = static_cast<int>(255.99 * col.b);
+
+      int pix_idx = j * nx + i;
+      img_data.data[n_channels * pix_idx + 0] = ir;
+      img_data.data[n_channels * pix_idx + 1] = ig;
+      img_data.data[n_channels * pix_idx + 2] = ib;
+    }
+  }
+}
+
+#ifdef _DEBUG
 int main(int argc, char** argv)
 {
   const int N_CHANNELS = 3;
@@ -98,41 +154,71 @@ int main(int argc, char** argv)
   if (argc > 3)
     n_samples = atoi(argv[3]);
 
-  HitObject* world = random_spheres();
+  HitObject* left_ball = new Sphere(vec3(-0.5f, 0.f, 0.f), 0.5f, new Lambertian(vec3(1.f, 0.f, 0.f)));
+  HitObject* right_ball = new Sphere(vec3(0.5f, 0.f, 0.f), 0.5f, new Lambertian(vec3(0.f, 1.f, 0.f)));
+  //HitObjectList* world = new HitObjectList;
+  //world->pushObject(left_ball);
+  //world->pushObject(right_ball);
+  HitObject* world = new BVHNode({left_ball, right_ball});
+
+  vec3 pos = vec3(0.f, 0.f, 1.f);
+  vec3 lookat = vec3(0.f, 0.f, -1.f);
+  vec3 up = vec3(0.f, 1.f, 0.f);
+  float aperture = 0.1f;
+  float dist_to_focus = 1.f;
+  Camera cam(pos, lookat, up, 60, float(nx) / float(ny), aperture,
+             dist_to_focus);
+  vector<int> data;
+
+  ImgData img_data = {
+                      .nx = nx,
+                      .ny = ny,
+                      .n_channels = N_CHANNELS,
+                      .data = data,
+  };
+
+  trace_full(world, cam, img_data, n_samples);
+  to_ppm(img_data);
+
+  return 0;
+}
+#else
+int main(int argc, char** argv)
+{
+  const int N_CHANNELS = 3;
+  int nx = 200;
+  int ny = 100;
+  int n_samples = 100;
+
+  if (argc > 1)
+    nx = atoi(argv[1]);
+  if (argc > 2)
+    ny = atoi(argv[2]);
+  if (argc > 3)
+    n_samples = atoi(argv[3]);
+
+  HitObject* world = random_spheres(true);
 
   vec3 pos = vec3(13.f, 2.f, 3.f);
   vec3 lookat = vec3(0.f, 0.f, 0.f);
   vec3 up = vec3(0.f, 1.f, 0.f);
   float aperture = 0.1f;
   float dist_to_focus = 10.f;
-  Camera cam(pos, lookat, up, 20, float(nx) / float(ny), aperture, dist_to_focus);
-  vector<int> img_data(nx * ny * N_CHANNELS);
+  Camera cam(pos, lookat, up, 20, float(nx) / float(ny), aperture,
+             dist_to_focus);
+  vector<int> data;
 
-  for (int j = ny-1; j >= 0; --j) {
-    for (int i = 0; i < nx; ++i) {
-      vec3 col(0.f);
-      for (int s = 0; s < n_samples; ++s) {
-        float u = static_cast<float>(i + rdouble()) / static_cast<float>(nx);
-        float v = static_cast<float>(j + rdouble()) / static_cast<float>(ny);
-        Ray r = cam.getRay(u, 1 - v);
-        col += color(r, *world, 0);
-      }
-      col /= static_cast<float>(n_samples);
-      col = sqrt(col);
+  ImgData img_data = {
+                 .nx = nx,
+                 .ny = ny,
+                 .n_channels = N_CHANNELS,
+                 .data = data,
+  };
 
-      int ir = static_cast<int>(255.99 * col.r);
-      int ig = static_cast<int>(255.99 * col.g);
-      int ib = static_cast<int>(255.99 * col.b);
+  trace_full(world, cam, img_data, n_samples);
+  to_ppm(img_data);
 
-      int pix_idx = j * nx + i;
-      img_data[N_CHANNELS * pix_idx + 0] = ir;
-      img_data[N_CHANNELS * pix_idx + 1] = ig;
-      img_data[N_CHANNELS * pix_idx + 2] = ib;
-    }
-  }
-
-  to_ppm(img_data, nx, ny, N_CHANNELS);
-
-  delete world;
+  //delete world;
   return 0;
 }
+#endif

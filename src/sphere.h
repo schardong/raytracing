@@ -19,6 +19,10 @@ public:
   Sphere(glm::vec3 center, float radius, Material* mat);
   virtual bool hit(const Ray& r, std::pair<float, float> t_lim,
                    HitRecord& rec) const;
+  virtual bool bounding_box(AABB& box) const;
+
+  const glm::vec3 center() const;
+  const float radius() const;
 
 private:
   glm::vec3 m_center;

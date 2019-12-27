@@ -1,6 +1,11 @@
 #include "hitobjectlist.h"
+#include "aabb.h"
 #include "ray.h"
 #include "hitrecord.h"
+
+HitObjectList::HitObjectList(std::vector<HitObject*>& objs) :
+  m_objects(objs)
+{}
 
 HitObjectList::~HitObjectList()
 {
@@ -27,6 +32,28 @@ bool HitObjectList::hit(const Ray& r, std::pair<float, float> t_lims,
   }
 
   return hit_any;
+}
+
+bool HitObjectList::bounding_box(AABB& box) const
+{
+  if (m_objects.empty())
+    return false;
+
+  AABB tmp;
+
+  if (m_objects[0]->bounding_box(tmp))
+    box = tmp;
+  else
+    return false;
+
+  for (size_t i = 1; i < m_objects.size(); ++i) {
+    if (m_objects[i]->bounding_box(tmp))
+      box = AABB(box, tmp);
+    else
+      return false;
+  }
+
+  return true;
 }
 
 void HitObjectList::pushObject(HitObject* obj)

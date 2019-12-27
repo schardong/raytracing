@@ -1,19 +1,20 @@
 #include "sphere.h"
+#include "aabb.h"
 #include "material.h"
 #include "hitrecord.h"
 #include "ray.h"
 
-Sphere::Sphere() : m_center(glm::vec3(0)), m_radius(1.f),
-                   m_material(new Lambertian(glm::vec3(0.f))) {}
+using glm::dot;
+using glm::vec3;
 
-Sphere::Sphere(glm::vec3 center, float r, Material* mat) :
+Sphere::Sphere() : m_center(vec3(0)), m_radius(1.f),
+                   m_material(new Lambertian(vec3(0.f))) {}
+
+Sphere::Sphere(vec3 center, float r, Material* mat) :
   m_center(center), m_radius(r), m_material(mat) {}
 
 bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) const
 {
-  using glm::dot;
-  using glm::vec3;
-
   vec3 oc = r.origin() - m_center;
   float a = dot(r.direction(), r.direction());
   float b = 2.f * dot(oc, r.direction());
@@ -42,3 +43,14 @@ bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) co
 
   return false;
 }
+
+bool Sphere::bounding_box(AABB& box) const
+{
+  box = AABB(center() - vec3(radius()),
+             center() + vec3(radius()));
+  return true;
+}
+
+const vec3 Sphere::center() const { return m_center; }
+
+const float Sphere::radius() const { return m_radius; }
