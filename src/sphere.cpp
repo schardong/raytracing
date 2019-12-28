@@ -3,15 +3,19 @@
 #include "material.h"
 #include "hitrecord.h"
 #include "ray.h"
+#include "texture.h"
 
 using glm::dot;
 using glm::vec3;
 
-Sphere::Sphere() : m_center(vec3(0)), m_radius(1.f),
-                   m_material(new Lambertian(vec3(0.f))) {}
+Sphere::Sphere() : m_center(vec3(0)), m_radius(1.f)
+{
+  m_material = std::make_shared<Lambertian>(std::make_unique<ConstantTexture>(vec3(0.f)));
+}
 
 Sphere::Sphere(vec3 center, float r, Material* mat) :
-  m_center(center), m_radius(r), m_material(mat) {}
+  m_center(center), m_radius(r), m_material(mat)
+{}
 
 bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) const
 {

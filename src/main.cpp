@@ -14,6 +14,7 @@
 #include "material.h"
 #include "ray.h"
 #include "sphere.h"
+#include "texture.h"
 #include "utils.hpp"
 
 using std::cout;
@@ -50,8 +51,20 @@ vec3 color(const Ray& r, const HitObject& world, int depth)
 
 HitObject* random_spheres(bool with_bvh=false)
 {
+  using std::unique_ptr;
+  using std::make_unique;
+
+  typedef ConstantTexture CT;
+  typedef CheckersTexture CHKT;
+
   std::vector<HitObject*> objs;
-  objs.push_back(new Sphere(vec3(0.f, -1000.f, 0.f), 1000.f, new Lambertian(vec3(0.5f))));
+
+  auto checkers = make_unique<CheckersTexture>(make_unique<CT>(vec3(0.2f, 0.3f, 0.1f)),
+                                               make_unique<CT>(vec3(0.9f)));
+
+  objs.push_back(new Sphere(vec3(0.f, -1000.f, 0.f),
+                            1000.f,
+                            new Lambertian(std::move(checkers))));
 
   for(int a = -11; a < 11; ++a) {
     for (int b = -11; b < 11; ++b) {
@@ -60,9 +73,10 @@ HitObject* random_spheres(bool with_bvh=false)
       Material* mat;
       if ((center - vec3(4.f, 0.2f, 0.f)).length() > 0.9f) {
         if (mat_prob < 0.8f) {
-          mat = new Lambertian(vec3(rdouble() * rdouble(),
-                                    rdouble() * rdouble(),
-                                    rdouble() * rdouble()));
+          auto t = make_unique<CT>(vec3(rdouble() * rdouble(),
+                                        rdouble() * rdouble(),
+                                        rdouble() * rdouble()));
+          mat = new Lambertian(std::move(t));
         } else if (mat_prob < 0.95f) {
           mat = new Metal(vec3(0.5f * (1 + rdouble()),
                                0.5f * (1 + rdouble()),
@@ -77,8 +91,9 @@ HitObject* random_spheres(bool with_bvh=false)
   }
 
   objs.push_back(new Sphere(vec3(0.f, 1.f, 0.f), 1.f, new Dielectric(1.5f)));
-  objs.push_back(new Sphere(vec3(-4.f, 1.f, 0.f), 1.f,
-                               new Lambertian(vec3(0.4f, 0.2f, 0.1f))));
+  objs.push_back(new Sphere(vec3(-4.f, 1.f, 0.f),
+                            1.f,
+                            new Lambertian(make_unique<CT>(vec3(0.4f, 0.2f, 0.1f)))));
   objs.push_back(new Sphere(vec3(4.f, 1.f, 0.f), 1.f,
                                new Metal(vec3(0.7f, 0.6f, 0.5f), 0.f)));
 
@@ -154,8 +169,16 @@ int main(int argc, char** argv)
   if (argc > 3)
     n_samples = atoi(argv[3]);
 
-  HitObject* left_ball = new Sphere(vec3(-0.5f, 0.f, 0.f), 0.5f, new Lambertian(vec3(1.f, 0.f, 0.f)));
-  HitObject* right_ball = new Sphere(vec3(0.5f, 0.f, 0.f), 0.5f, new Lambertian(vec3(0.f, 1.f, 0.f)));
+  Texture* red = new ConstantTexture(vec3(1.f, 0.f, 0.f));
+  Texture* green = new ConstantTexture(vec3(0.f, 1.f, 0.f));
+
+  HitObject* left_ball = new Sphere(vec3(-0.5f, 0.f, 0.f),
+                                    0.5f,
+                                    new Lambertian(std::move(red)));
+  HitObject* right_ball = new Sphere(vec3(0.5f, 0.f, 0.f),
+                                     0.5f,
+                                     new Lambertian(std::move(green)));
+
   //HitObjectList* world = new HitObjectList;
   //world->pushObject(left_ball);
   //world->pushObject(right_ball);

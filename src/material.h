@@ -1,11 +1,14 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include <memory>
+
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
 class HitRecord;
 class Ray;
+class Texture;
 
 class Material
 {
@@ -18,13 +21,13 @@ public:
 class Lambertian: public Material
 {
 public:
-  Lambertian(glm::vec3 albedo);
+  Lambertian(std::unique_ptr<Texture> albedo);
   virtual ~Lambertian() = default;
   virtual bool scatter(const Ray& r_in, const HitRecord& rec,
                        glm::vec3& attenuation, Ray& scattered) const;
 
 private:
-  glm::vec3 m_albedo;
+  std::unique_ptr<Texture> m_albedo;
 };
 
 class Metal: public Material
