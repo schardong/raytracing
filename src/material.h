@@ -16,6 +16,10 @@ public:
   virtual ~Material() {};
   virtual bool scatter(const Ray& r_in, const HitRecord& rec,
                        glm::vec3& attenuation, Ray& scattered) const = 0;
+  virtual glm::vec3 emit() const
+  {
+    return glm::vec3(0.f);
+  }
 };
 
 class Lambertian: public Material
@@ -52,6 +56,19 @@ public:
 
 private:
   float m_refraction_index;
+};
+
+class DiffuseLight : public Material
+{
+public:
+  DiffuseLight(glm::vec3 color);
+  ~DiffuseLight() = default;
+  virtual bool scatter(const Ray& r_in, const HitRecord& rec,
+                       glm::vec3& attenuation, Ray& scattered) const;
+  virtual glm::vec3 emit() const;
+
+private:
+  glm::vec3 m_color;
 };
 
 #endif // MATERIAL_H
