@@ -2,7 +2,6 @@
 #include "hitrecord.h"
 #include "ray.h"
 #include "texture.h"
-#include "utils.hpp"
 
 using glm::vec3;
 

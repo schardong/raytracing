@@ -2,7 +2,7 @@
 #include "hitrecord.h"
 #include "ray.h"
 #include "texture.h"
-#include "utils.hpp"
+#include "utils.h"
 
 Lambertian::Lambertian(std::unique_ptr<Texture> albedo) :
   m_albedo(std::move(albedo))

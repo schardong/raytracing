@@ -1,7 +1,7 @@
 #include "material.h"
 #include "hitrecord.h"
 #include "ray.h"
-#include "utils.hpp"
+#include "utils.h"
 
 Metal::Metal(glm::vec3 albedo, float fuzz) : m_albedo(albedo)
 {

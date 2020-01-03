@@ -1,7 +1,7 @@
 #include "material.h"
 #include "hitrecord.h"
 #include "ray.h"
-#include "utils.hpp"
+#include "utils.h"
 
 float schlick(float cosine, float ref_idx)
 {

@@ -2,7 +2,7 @@
 #include "aabb.h"
 #include "hitrecord.h"
 #include "ray.h"
-#include "utils.hpp"
+#include "utils.h"
 
 #include <algorithm>
 #include <cmath>
