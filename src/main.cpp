@@ -9,17 +9,20 @@
 #include "aabb.h"
 #include "bvhnode.h"
 #include "camera.h"
+#include "geomgen.h"
 #include "hitrecord.h"
 #include "hitobjectlist.h"
 #include "material.h"
 #include "ray.h"
 #include "sphere.h"
 #include "texture.h"
-#include "utils.hpp"
+#include "utils.h"
 
 using std::cout;
 using std::endl;
 using std::vector;
+using std::unique_ptr;
+using std::make_unique;
 using glm::vec3;
 
 typedef struct
@@ -36,90 +39,19 @@ vec3 color(const Ray& r, const HitObject& world, int depth)
   if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
     Ray scattered;
     vec3 attenuation;
+    vec3 emitted = rec.material->emit();
 
     if (depth < 50 && rec.material->scatter(r, rec, attenuation, scattered)) {
       return attenuation * color(scattered, world, depth + 1);
-    } else {
-      return vec3(0.f);
     }
+    return emitted;
   }
+
+  //  return vec3(0.f);
 
   vec3 unit_dir = glm::normalize(r.direction());
   float t = 0.5f * (unit_dir.y + 1.f);
   return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
-}
-
-HitObject* random_spheres(bool with_bvh=false)
-{
-  using std::unique_ptr;
-  using std::make_unique;
-
-  typedef ConstantTexture CT;
-  typedef CheckersTexture CHKT;
-
-  std::vector<HitObject*> objs;
-
-  auto checkers = make_unique<CheckersTexture>(make_unique<CT>(vec3(0.2f, 0.3f, 0.1f)),
-                                               make_unique<CT>(vec3(0.9f)));
-
-  objs.push_back(new Sphere(vec3(0.f, -1000.f, 0.f),
-                            1000.f,
-                            new Lambertian(std::move(checkers))));
-
-  for(int a = -11; a < 11; ++a) {
-    for (int b = -11; b < 11; ++b) {
-      float mat_prob = rdouble();
-      vec3 center = vec3(a + 0.9f * rdouble(), 0.2f, b + 0.9f * rdouble());
-      Material* mat;
-      if ((center - vec3(4.f, 0.2f, 0.f)).length() > 0.9f) {
-        if (mat_prob < 0.8f) {
-          auto t = make_unique<CT>(vec3(rdouble() * rdouble(),
-                                        rdouble() * rdouble(),
-                                        rdouble() * rdouble()));
-          mat = new Lambertian(std::move(t));
-        } else if (mat_prob < 0.95f) {
-          mat = new Metal(vec3(0.5f * (1 + rdouble()),
-                               0.5f * (1 + rdouble()),
-                               0.5f * (1 + rdouble())),
-                          0.5f * rdouble());
-        } else {
-          mat = new Dielectric(1.5f);
-        }
-        objs.push_back(new Sphere(center, 0.2f, mat));
-      }
-    }
-  }
-
-  objs.push_back(new Sphere(vec3(0.f, 1.f, 0.f), 1.f, new Dielectric(1.5f)));
-  objs.push_back(new Sphere(vec3(-4.f, 1.f, 0.f),
-                            1.f,
-                            new Lambertian(make_unique<CT>(vec3(0.4f, 0.2f, 0.1f)))));
-  objs.push_back(new Sphere(vec3(4.f, 1.f, 0.f), 1.f,
-                               new Metal(vec3(0.7f, 0.6f, 0.5f), 0.f)));
-
-  if (with_bvh) {
-    BVHNode* root = new BVHNode(objs);
-    return root;
-  }
-
-  HitObjectList* world = new HitObjectList(objs);
-  return world;
-}
-
-void to_ppm(ImgData& img)
-{
-  if (img.data.empty()) {
-    throw std::runtime_error("No valid image data found.");
-    return;
-  }
-
-  int n_channels = img.n_channels;
-  cout << "P3\n" << img.nx << " " << img.ny << "\n255" << endl;
-  for (size_t i = 0; i < img.data.size(); i += img.n_channels) {
-    for (size_t c = 0; c < img.n_channels; ++c)
-      cout << img.data[i+c] << " ";
-    cout << endl;
-  }
 }
 
 void trace_full(HitObject* world, Camera& cam, ImgData& img_data,
@@ -154,7 +86,7 @@ void trace_full(HitObject* world, Camera& cam, ImgData& img_data,
   }
 }
 
-#ifdef _DEBUG
+#ifndef _DEBUG
 int main(int argc, char** argv)
 {
   const int N_CHANNELS = 3;
@@ -169,26 +101,27 @@ int main(int argc, char** argv)
   if (argc > 3)
     n_samples = atoi(argv[3]);
 
-  Texture* red = new ConstantTexture(vec3(1.f, 0.f, 0.f));
-  Texture* green = new ConstantTexture(vec3(0.f, 1.f, 0.f));
+  auto red = make_unique<ConstantTexture>(vec3(1.f, 0.f, 0.f));
+  auto green = make_unique<ConstantTexture>(vec3(0.f, 1.f, 0.f));
+  auto perlin = make_unique<PerlinTexture>();
 
-  HitObject* left_ball = new Sphere(vec3(-0.5f, 0.f, 0.f),
-                                    0.5f,
-                                    new Lambertian(std::move(red)));
-  HitObject* right_ball = new Sphere(vec3(0.5f, 0.f, 0.f),
-                                     0.5f,
-                                     new Lambertian(std::move(green)));
+  HitObject* ground = new Sphere(vec3(0.f, -1000.f, 0.f),
+                                 1000.f,
+                                 new Lambertian(std::move(perlin)));
+  HitObject* ball = new Sphere(vec3(0.f, 1.f, 0.f),
+                               1.f,
+                               new Lambertian(std::move(green)));
+  HitObject* sun = new Sphere(vec3(0.f, 2.f, 2.f),
+                              0.2f,
+                              new Lambertian(std::move(red)));
 
-  //HitObjectList* world = new HitObjectList;
-  //world->pushObject(left_ball);
-  //world->pushObject(right_ball);
-  HitObject* world = new BVHNode({left_ball, right_ball});
+  HitObject* world = new BVHNode({ground, ball, sun});
 
-  vec3 pos = vec3(0.f, 0.f, 1.f);
-  vec3 lookat = vec3(0.f, 0.f, -1.f);
+  vec3 pos = vec3(13.f, 2.f, 3.f);
+  vec3 lookat = vec3(0.f, 0.f, 0.f);
   vec3 up = vec3(0.f, 1.f, 0.f);
-  float aperture = 0.1f;
-  float dist_to_focus = 1.f;
+  float aperture = 0.0f;
+  float dist_to_focus = 10.f;
   Camera cam(pos, lookat, up, 60, float(nx) / float(ny), aperture,
              dist_to_focus);
   vector<int> data;
@@ -201,7 +134,7 @@ int main(int argc, char** argv)
   };
 
   trace_full(world, cam, img_data, n_samples);
-  to_ppm(img_data);
+  to_ppm({nx, ny}, N_CHANNELS, img_data.data);
 
   return 0;
 }
@@ -220,7 +153,7 @@ int main(int argc, char** argv)
   if (argc > 3)
     n_samples = atoi(argv[3]);
 
-  HitObject* world = random_spheres(true);
+  HitObject* world = two_spheres();//book1_cover(true);
 
   vec3 pos = vec3(13.f, 2.f, 3.f);
   vec3 lookat = vec3(0.f, 0.f, 0.f);

@@ -6,6 +6,8 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+class PerlinGenerator;
+
 class Texture
 {
 public:
@@ -36,6 +38,17 @@ public:
 private:
   std::unique_ptr<Texture> m_even;
   std::unique_ptr<Texture> m_odd;
+};
+
+class PerlinTexture: public Texture
+{
+public:
+  PerlinTexture();
+  virtual ~PerlinTexture();
+  virtual glm::vec3 value(std::pair<float, float> uv, glm::vec3 p) const;
+
+private:
+  std::unique_ptr<PerlinGenerator> m_noisegen;
 };
 
 #endif // TEXTURE_H
