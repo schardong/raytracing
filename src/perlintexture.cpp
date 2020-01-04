@@ -9,7 +9,7 @@ void generate_seed(std::vector<float>& seed)
 {
   seed.resize(256);
   for (auto& s : seed)
-    s = rdouble();
+    s = static_cast<float>(rdouble());
 }
 
 class PerlinGenerator
@@ -25,19 +25,6 @@ private:
   std::vector<int> m_permy;
   std::vector<int> m_permz;
 };
-
-PerlinTexture::PerlinTexture()
-{
-  m_noisegen = std::make_unique<PerlinGenerator>();
-}
-
-PerlinTexture::~PerlinTexture()
-{}
-
-glm::vec3 PerlinTexture::value(std::pair<float, float> uv, glm::vec3 p) const
-{
-  return glm::vec3(1.f) * m_noisegen->noise(p);
-}
 
 PerlinGenerator::PerlinGenerator()
 {
@@ -61,8 +48,37 @@ PerlinGenerator::PerlinGenerator()
 
 float PerlinGenerator::noise(glm::vec3 p)
 {
-  int i = std::floor(std::abs(p.x));
-  int j = std::floor(std::abs(p.y));
-  int k = std::floor(std::abs(p.z));
-  return m_randfloat[m_permx[i] ^ m_permy[j] ^ m_permz[k]];
+  int i = static_cast<int>(std::floor(std::abs(p.x)));
+  int j = static_cast<int>(std::floor(std::abs(p.y)));
+  int k = static_cast<int>(std::floor(std::abs(p.z)));
+
+  float c[2][2][2];
+  for (int di = 0; di < 2; ++di)
+    for (int dj = 0; dj < 2; ++dj)
+      for (int dk = 0; dk < 2; ++dk)
+        c[di][dj][dk] = m_randfloat[m_permx[i+di] ^ m_permy[j+dj] ^ m_permz[k+dk]];
+
+  float u = std::abs(p.x) - static_cast<float>(i);
+  float v = std::abs(p.y) - static_cast<float>(j);
+  float w = std::abs(p.z) - static_cast<float>(k);
+
+  u = u * u * (3 - 2 * u);
+  v = v * v * (3 - 2 * v);
+  w = w * w * (3 - 2 * w);
+
+  return trilinear_interp(c, {u, v, w});
+}
+
+PerlinTexture::PerlinTexture()
+{
+  m_noisegen = std::make_unique<PerlinGenerator>();
+}
+
+PerlinTexture::~PerlinTexture()
+{}
+
+glm::vec3 PerlinTexture::value(std::pair<float, float> uv, glm::vec3 p) const
+{
+  float n = m_noisegen->noise(p);
+  return glm::vec3(1.f) * n;
 }

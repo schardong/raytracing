@@ -20,4 +20,6 @@ bool refract(glm::vec3 v, glm::vec3 n, float ni_over_nt, glm::vec3& refracted);
 void to_ppm(std::pair<int, int> img_dims, int n_channels,
             std::vector<int>& img_data);
 
+float trilinear_interp(float c[2][2][2], std::tuple<float, float, float> uvw);
+
 #endif // UTILS_HPP

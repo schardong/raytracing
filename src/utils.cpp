@@ -71,3 +71,24 @@ void to_ppm(std::pair<int, int> img_dims, int n_channels,
     cout << endl;
   }
 }
+
+float trilinear_interp(float c[2][2][2], std::tuple<float, float, float> uvw)
+{
+  float acc = 0.f;
+  float u = std::get<0>(uvw);
+  float v = std::get<1>(uvw);
+  float w = std::get<2>(uvw);
+
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 0; j < 2; ++j) {
+      for (int k = 0; k < 2; ++k) {
+        acc +=
+          (i * u + (1 - i) * (1 - u)) *
+          (j * v + (1 - j) * (1 - v)) *
+          (k * w + (1 - k) * (1 - w)) *
+          c[i][j][k];
+      }
+    }
+  }
+  return acc;
+}
