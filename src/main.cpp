@@ -18,8 +18,6 @@
 #include "texture.h"
 #include "utils.h"
 
-using std::cout;
-using std::endl;
 using std::vector;
 using std::unique_ptr;
 using std::make_unique;
@@ -102,7 +100,7 @@ int main(int argc, char** argv)
 
   auto red = make_unique<ConstantTexture>(vec3(1.f, 0.f, 0.f));
   auto green = make_unique<ConstantTexture>(vec3(0.f, 1.f, 0.f));
-  auto perlin = make_unique<PerlinTexture>();
+  auto perlin = make_unique<PerlinTexture>(10.f);
 
   HitObject* ground = new Sphere(vec3(0.f, -1000.f, 0.f),
                                  1000.f,

@@ -44,11 +44,13 @@ class PerlinTexture: public Texture
 {
 public:
   PerlinTexture();
+  PerlinTexture(float scale);
   virtual ~PerlinTexture();
   virtual glm::vec3 value(std::pair<float, float> uv, glm::vec3 p) const;
 
 private:
   std::unique_ptr<PerlinGenerator> m_noisegen;
+  float m_scale;
 };
 
 #endif // TEXTURE_H

@@ -69,16 +69,26 @@ float PerlinGenerator::noise(glm::vec3 p)
   return trilinear_interp(c, {u, v, w});
 }
 
-PerlinTexture::PerlinTexture()
+/* Exported methods */
+PerlinTexture::PerlinTexture() :
+  m_scale(1.f)
+{
+  m_noisegen = std::make_unique<PerlinGenerator>();
+}
+
+PerlinTexture::PerlinTexture(float scale) :
+  m_scale(scale)
 {
   m_noisegen = std::make_unique<PerlinGenerator>();
 }
 
 PerlinTexture::~PerlinTexture()
-{}
+{
+  m_noisegen.reset(nullptr);
+}
 
 glm::vec3 PerlinTexture::value(std::pair<float, float> uv, glm::vec3 p) const
 {
-  float n = m_noisegen->noise(p);
+  float n = m_noisegen->noise(m_scale * p);
   return glm::vec3(1.f) * n;
 }
