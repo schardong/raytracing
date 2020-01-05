@@ -99,15 +99,15 @@ int main(int argc, char** argv)
     n_samples = atoi(argv[3]);
 
   auto red = make_unique<ConstantTexture>(vec3(1.f, 0.f, 0.f));
-  auto green = make_unique<ConstantTexture>(vec3(0.f, 1.f, 0.f));
-  auto perlin = make_unique<PerlinTexture>(10.f);
+  auto p0 = make_unique<PerlinTexture>(10.f);
+  auto p1 = make_unique<PerlinTexture>(1.f);
 
   HitObject* ground = new Sphere(vec3(0.f, -1000.f, 0.f),
                                  1000.f,
-                                 new Lambertian(std::move(perlin)));
+                                 new Lambertian(std::move(p1)));
   HitObject* ball = new Sphere(vec3(0.f, 1.f, 0.f),
                                1.f,
-                               new Lambertian(std::move(green)));
+                               new Lambertian(std::move(p0)));
   HitObject* sun = new Sphere(vec3(0.f, 2.f, 2.f),
                               0.2f,
                               new Lambertian(std::move(red)));
