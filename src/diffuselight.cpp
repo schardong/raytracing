@@ -3,11 +3,8 @@
 #include "ray.h"
 #include "texture.h"
 
-using glm::vec3;
-
-DiffuseLight::DiffuseLight(vec3 color) : m_color(color) {
-  float a = 0.f;
-}
+DiffuseLight::DiffuseLight(glm::vec3 color) : m_color(color)
+{}
 
 bool DiffuseLight::scatter(const Ray& r_in, const HitRecord& rec,
                            glm::vec3& attenuation, Ray& scattered) const

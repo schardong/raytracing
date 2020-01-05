@@ -7,6 +7,14 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+typedef struct
+{
+  int nx;
+  int ny;
+  int n_channels;
+  std::vector<int> data;
+} ImgData;
+
 double rdouble();
 
 glm::vec3 runit_sphere();
