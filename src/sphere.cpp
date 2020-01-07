@@ -1,7 +1,7 @@
 #include "sphere.h"
 #include "aabb.h"
-#include "material.h"
 #include "hitrecord.h"
+#include "material.h"
 #include "ray.h"
 #include "texture.h"
 
@@ -16,6 +16,11 @@ Sphere::Sphere() : m_center(vec3(0)), m_radius(1.f)
 Sphere::Sphere(vec3 center, float r, Material* mat) :
   m_center(center), m_radius(r), m_material(mat)
 {}
+
+Sphere::~Sphere()
+{
+  m_material.reset();
+}
 
 bool Sphere::hit(const Ray& r, std::pair<float, float> t_lim, HitRecord& rec) const
 {

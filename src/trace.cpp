@@ -25,16 +25,12 @@ vec3 color(const Ray& r, const HitObject& world, int depth)
     vec3 emitted = rec.material->emit();
 
     if (depth < 50 && rec.material->scatter(r, rec, attenuation, scattered)) {
-      return attenuation * color(scattered, world, depth + 1);
+      return emitted + attenuation * color(scattered, world, depth + 1);
     }
     return emitted;
   }
 
   return vec3(0.f);
-
-  vec3 unit_dir = glm::normalize(r.direction());
-  float t = 0.5f * (unit_dir.y + 1.f);
-  return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
 }
 
 void trace(HitObject* world, Camera& cam, ImgData& img_data,
@@ -57,9 +53,9 @@ void trace(HitObject* world, Camera& cam, ImgData& img_data,
       col /= static_cast<float>(samples_per_pix);
       col = sqrt(col);
 
-      int ir = static_cast<int>(255.99 * col.r);
-      int ig = static_cast<int>(255.99 * col.g);
-      int ib = static_cast<int>(255.99 * col.b);
+      int ir = std::clamp(static_cast<int>(255.99 * col.r), 0, 255);
+      int ig = std::clamp(static_cast<int>(255.99 * col.g), 0, 255);
+      int ib = std::clamp(static_cast<int>(255.99 * col.b), 0, 255);
 
       int pix_idx = j * nx + i;
       img_data.data[n_channels * pix_idx + 0] = ir;

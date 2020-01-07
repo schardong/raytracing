@@ -17,6 +17,8 @@ class Sphere: public HitObject
 public:
   Sphere();
   Sphere(glm::vec3 center, float radius, Material* mat);
+  virtual ~Sphere();
+
   virtual bool hit(const Ray& r, std::pair<float, float> t_lim,
                    HitRecord& rec) const;
   virtual bool bounding_box(AABB& box) const;
