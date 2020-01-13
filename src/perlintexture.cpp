@@ -134,5 +134,6 @@ PerlinTexture::~PerlinTexture()
 glm::vec3 PerlinTexture::value(std::pair<float, float> uv, glm::vec3 p) const
 {
   float t = m_noisegen->turbulence(p);
-  return glm::vec3(1.f) * 0.5f * (1 + sin(m_scale * p.z + 10.f * t));
+  float ct = 0.5f * (1 + sin(m_scale * p.z + 10.f * t));
+  return ct * glm::vec3(1.f);
 }

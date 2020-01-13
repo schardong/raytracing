@@ -73,7 +73,8 @@ int main(int argc, char** argv)
                       .data = data,
   };
 
-  trace(world, cam, img_data, n_samples);
+  LightTracer t;
+  t.trace(world, cam, img_data, n_samples);
   to_ppm({nx, ny}, N_CHANNELS, img_data.data);
 
   return 0;

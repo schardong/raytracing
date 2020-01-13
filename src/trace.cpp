@@ -16,25 +16,8 @@ using std::unique_ptr;
 using std::make_unique;
 using glm::vec3;
 
-vec3 color(const Ray& r, const HitObject& world, int depth)
-{
-  HitRecord rec;
-  if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
-    Ray scattered;
-    vec3 attenuation;
-    vec3 emitted = rec.material->emit();
-
-    if (depth < 50 && rec.material->scatter(r, rec, attenuation, scattered)) {
-      return emitted + attenuation * color(scattered, world, depth + 1);
-    }
-    return emitted;
-  }
-
-  return vec3(0.f);
-}
-
-void trace(HitObject* world, Camera& cam, ImgData& img_data,
-           int samples_per_pix)
+void Tracer::trace(HitObject* world, Camera& cam, ImgData& img_data,
+                   int samples_per_pix) const
 {
   int nx = img_data.nx;
   int ny = img_data.ny;
@@ -53,9 +36,9 @@ void trace(HitObject* world, Camera& cam, ImgData& img_data,
       col /= static_cast<float>(samples_per_pix);
       col = sqrt(col);
 
-      int ir = std::clamp(static_cast<int>(255.99 * col.r), 0, 255);
-      int ig = std::clamp(static_cast<int>(255.99 * col.g), 0, 255);
-      int ib = std::clamp(static_cast<int>(255.99 * col.b), 0, 255);
+      int ir = std::min(255, std::max(static_cast<int>(255.99 * col.r), 0));
+      int ig = std::min(255, std::max(static_cast<int>(255.99 * col.g), 0));
+      int ib = std::min(255, std::max(static_cast<int>(255.99 * col.b), 0));
 
       int pix_idx = j * nx + i;
       img_data.data[n_channels * pix_idx + 0] = ir;
@@ -63,4 +46,33 @@ void trace(HitObject* world, Camera& cam, ImgData& img_data,
       img_data.data[n_channels * pix_idx + 2] = ib;
     }
   }
+}
+
+vec3 NormalTracer::color(const Ray& r, const HitObject& world, int depth) const
+{
+  HitRecord rec;
+  if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
+    return (0.5f * (rec.normal + 1.f));
+  }
+
+  vec3 unit_dir = glm::normalize(r.direction());
+  float t = 0.5f * (unit_dir.y + 1.f);
+  return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
+}
+
+vec3 LightTracer::color(const Ray& r, const HitObject& world, int depth) const
+{
+  HitRecord rec;
+  if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
+    Ray scattered;
+    vec3 attenuation;
+    vec3 emitted = rec.material->emit();
+
+    if (depth < 50 && rec.material->scatter(r, rec, attenuation, scattered)) {
+      return emitted + attenuation * color(scattered, world, depth + 1);
+    }
+    return emitted;
+  }
+
+  return vec3(0.f);
 }

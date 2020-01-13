@@ -5,9 +5,7 @@
 
 Metal::Metal(glm::vec3 albedo, float fuzz) : m_albedo(albedo)
 {
-  if (fuzz < 0.f) m_fuzz = 0.f;
-  else if (fuzz > 1.f) m_fuzz = 1.f;
-  else m_fuzz = fuzz;
+  m_fuzz = std::min(1.f, std::max(fuzz, 0.f));
 }
 
 bool Metal::scatter(const Ray& r_in, const HitRecord& rec,

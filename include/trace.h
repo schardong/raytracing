@@ -7,9 +7,36 @@ class HitObject;
 class Ray;
 class Camera;
 
-glm::vec3 color(const Ray& r, const HitObject& world, int depth);
+/**
+ * @brief Base ray tracer class
+ */
+class Tracer
+{
+public:
+  virtual glm::vec3 color(const Ray& r, const HitObject& world,
+                          int depth) const = 0;
+  virtual void trace(HitObject* world, Camera& cam, ImgData& img_data,
+                     int samples_per_pix) const;
+};
 
-void trace(HitObject* world, Camera& cam, ImgData& img_data,
-           int samples_per_pix);
+/**
+ * @brief
+ */
+class NormalTracer : public Tracer
+{
+public:
+  virtual glm::vec3 color(const Ray& r, const HitObject& world,
+                          int depth) const;
+};
+
+/**
+ * @brief
+ */
+class LightTracer : public Tracer
+{
+public:
+  virtual glm::vec3 color(const Ray& r, const HitObject& world,
+                          int depth) const;
+};
 
 #endif // TRACE_H

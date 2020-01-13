@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef UTILS_H
+#define UTILS_H
 
 #include <iostream>
 #include <vector>
@@ -30,4 +30,4 @@ void to_ppm(std::pair<int, int> img_dims, int n_channels,
 
 float trilinear_interp(float c[2][2][2], std::tuple<float, float, float> uvw);
 
-#endif // UTILS_HPP
+#endif // UTILS_H
