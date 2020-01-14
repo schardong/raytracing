@@ -14,20 +14,20 @@ int main()
   using namespace std;
   using namespace glm;
 
-  const int nx = 200;
+  const int nx = 400;
   const int ny = 200;
   const int n_samples = 100;
 
   auto p0 = make_unique<ConstantTexture>(glm::vec3(0.8f));
   auto p1 = make_unique<ConstantTexture>(glm::vec3(0.9f));
 
-  HitObject* ground = new Sphere(vec3(0.f, -100.f, -2.f),
+  HitObject* ground = new Sphere(vec3(0.f, -100.5f, 0.f),
                                  100.f,
                                  new Lambertian(std::move(p0)));
-  HitObject* ball = new Sphere(vec3(0.f, 1.f, -2.f),
-                               1.f,
+  HitObject* ball = new Sphere(vec3(0.f, 0.f, -1.f),
+                               0.5f,
                                new Lambertian(std::move(p1)));
-  HitObject* world = new BVHNode({ground, ball});
+  BVHNode* world = new BVHNode({ground, ball});
 
   vec3 pos = vec3(0.f);
   vec3 lookat = vec3(0.f, 0.f, -1.f);
