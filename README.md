@@ -1,6 +1,6 @@
 # Ray tracing in a week(end)
 
-This is my implementation of the excellent (Ray Tracing In One Weekend)[https://raytracing.github.io/books/RayTracingInOneWeekend.html] and (Ray Tracing: The Next Week)[https://raytracing.github.io/books/RayTracingTheNextWeek.html] books. I tried to adhere to a C++17 standard and some book chapters were separated in tags.
+This is my implementation of the excellent [Ray Tracing In One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) and [Ray Tracing: The Next Week](https://raytracing.github.io/books/RayTracingTheNextWeek.html) books. I tried to adhere to a C++17 standard and some book chapters were separated in tags.
 
 ## Building and Running
 
@@ -10,5 +10,8 @@ To build the code, we use CMake (v3.11) to provide a minimum of portability.
 
 ## Samples
 
-[Image from book 1](img/book1_cover_1400-1000-100_BVH.ppm)
-[Image from book 1 + textured ground](img/book1_cover_tex.ppm)
+First book cover
+![Image from book 1](/img/book1_cover_1400-1000-100_BVH.ppm)
+
+First book cover + textured ground
+![Image from book 1 + textured ground](/img/book1_cover_tex.ppm)
