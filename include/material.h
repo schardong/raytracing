@@ -10,6 +10,14 @@ class HitRecord;
 class Ray;
 class Texture;
 
+
+/**
+ * @brief Base class for all materials.
+ *
+ * All subclasses must implement the `scatter` method. All materials that emit
+ * light must also override the `emit` method, which by default, returns
+ * `vec3(0)`.
+ */
 class Material
 {
 public:
@@ -22,6 +30,15 @@ public:
   }
 };
 
+
+/**
+ * @brief Class for general diffuse materials.
+ *
+ * This class represents diffuse, non-emitting materials. They don't have a
+ * specularity component on their color. This class also supports textures.
+ *
+ * @seealso Texture
+ */
 class Lambertian: public Material
 {
 public:
@@ -34,6 +51,15 @@ private:
   std::unique_ptr<Texture> m_albedo;
 };
 
+
+/**
+ * @brief Class for metallic materials.
+ *
+ * This class represents metallic materials. While they reflect light, they
+ * don't emit any. Such materials have an innate color, but no texture. They
+ * may also be fuzzy, i.e. the reflecting rays are slightly perturbed, thus
+ * giving a diffuse aspect to the material.
+ */
 class Metal: public Material
 {
 public:
@@ -46,6 +72,14 @@ private:
   float m_fuzz;
 };
 
+
+/**
+ * @brief Class for dielectric materials, i.e. glass.
+ *
+ * This class represents materials that refract light, such as glass. This
+ * material has no color, being fully transparent. The only parameter is the
+ * refraction index of the material
+ */
 class Dielectric: public Material
 {
 public:
@@ -58,6 +92,13 @@ private:
   float m_refraction_index;
 };
 
+
+/**
+ * @brief Class for light emitting materials
+ *
+ * This material does not reflect or refract light in any way, only emits it.
+ * The light color is passed as a parameter to the constructor.
+ */
 class DiffuseLight : public Material
 {
 public:

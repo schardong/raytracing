@@ -20,7 +20,7 @@ public:
 };
 
 /**
- * @brief
+ * @brief A debugging tracer to show the normals of all objects in the scene.
  */
 class NormalTracer : public Tracer
 {

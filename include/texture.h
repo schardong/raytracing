@@ -8,6 +8,11 @@
 
 class PerlinGenerator;
 
+/**
+ * @brief Base class for all 2D textures.
+ *
+ * All subclasses must implement the `value` method.
+ */
 class Texture
 {
 public:
@@ -15,6 +20,10 @@ public:
   virtual glm::vec3 value(std::pair<float, float> uv, glm::vec3 p) const = 0;
 };
 
+
+/**
+ * @brief Class to represent a constant, uniform texture.
+ */
 class ConstantTexture: public Texture
 {
 public:
@@ -27,6 +36,13 @@ private:
   glm::vec3 m_color;
 };
 
+
+/**
+ * @brief Class for checkers pattern textures.
+ *
+ * This class represents a material similar to a checkers, or chess board.
+ * Each color is a constant texture, applied in an interleaving manner.
+ */
 class CheckersTexture: public Texture
 {
 public:
@@ -40,6 +56,13 @@ private:
   std::unique_ptr<Texture> m_odd;
 };
 
+
+/**
+ * @brief Class for textures based on perlin noise.
+ *
+ * This class implements a perlin noise texture using an internal generator.
+ * The end effect is a marble-like texture.
+ */
 class PerlinTexture: public Texture
 {
 public:
