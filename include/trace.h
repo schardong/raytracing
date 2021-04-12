@@ -19,6 +19,18 @@ public:
                      int samples_per_pix) const;
 };
 
+
+/**
+ * @brief Basic tracer for scenes with no emiter materials (book 1)
+ */
+class BasicTracer : public Tracer
+{
+public:
+  virtual glm::vec3 color(const Ray& r, const HitObject& world,
+                          int depth) const;
+};
+
+
 /**
  * @brief A debugging tracer to show the normals of all objects in the scene.
  */
@@ -28,6 +40,7 @@ public:
   virtual glm::vec3 color(const Ray& r, const HitObject& world,
                           int depth) const;
 };
+
 
 /**
  * @brief

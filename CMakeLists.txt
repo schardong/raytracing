@@ -44,3 +44,11 @@ target_include_directories(t_normal_spheres
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
 )
 target_link_libraries(t_normal_spheres trace)
+
+add_executable(t_basic "test/ball_no_tex.cpp")
+target_include_directories(t_basic
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/ext
+)
+target_link_libraries(t_basic trace)

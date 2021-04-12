@@ -48,6 +48,20 @@ void Tracer::trace(HitObject* world, Camera& cam, ImgData& img_data,
   }
 }
 
+vec3 BasicTracer::color(const Ray& r, const HitObject& world, int depth) const
+{
+  HitRecord rec;
+  if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
+    vec3 target = rec.p + rec.normal + runit_sphere();
+    const Ray reflected = Ray(rec.p, target - rec.p);
+    return 0.5f * color(reflected, world, depth - 1);
+  }
+
+  vec3 unit_dir = glm::normalize(r.direction());
+  float t = 0.5f * (unit_dir.y + 1.f);
+  return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
+}
+
 vec3 NormalTracer::color(const Ray& r, const HitObject& world, int depth) const
 {
   HitRecord rec;
