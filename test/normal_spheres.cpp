@@ -47,7 +47,7 @@ int main()
   };
 
   NormalTracer t;
-  t.trace(world, cam, img_data, 3);
+  t.trace(world, cam, img_data, n_samples);
   to_ppm({nx, ny}, 3, img_data.data);
 
   return 0;
