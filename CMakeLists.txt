@@ -53,10 +53,10 @@ target_include_directories(t_normal_spheres
 )
 target_link_libraries(t_normal_spheres trace)
 
-add_executable(t_basic "test/ball_no_tex.cpp")
-target_include_directories(t_basic
+add_executable(t_book1 "test/book1_cover.cpp")
+target_include_directories(t_book1
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
 )
-target_link_libraries(t_basic trace)
+target_link_libraries(t_book1 trace)
