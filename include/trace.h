@@ -8,7 +8,7 @@ class Ray;
 class Camera;
 
 /**
- * @brief Base ray tracer class
+ * @brief Base ray tracer class.
  */
 class Tracer
 {
@@ -21,7 +21,7 @@ public:
 
 
 /**
- * @brief Basic tracer for scenes with no emiter materials (book 1)
+ * @brief Basic tracer with no support for emiter materials, reflection or refraction.
  */
 class BasicTracer : public Tracer
 {
@@ -32,7 +32,18 @@ public:
 
 
 /**
- * @brief A debugging tracer to show the normals of all objects in the scene.
+ * @brief Same as `BasicTracer, but with support for reflection and refraction.
+ */
+class ReflectionTracer : public Tracer
+{
+public:
+  virtual glm::vec3 color(const Ray& r, const HitObject& world,
+                          int depth) const;
+};
+
+
+/**
+ * @brief A tracer to show the normals of all objects in the scene.
  */
 class NormalTracer : public Tracer
 {
@@ -43,7 +54,7 @@ public:
 
 
 /**
- * @brief
+ * @brief A tracer that includes light emitting materials.
  */
 class LightTracer : public Tracer
 {

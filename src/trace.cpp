@@ -62,6 +62,26 @@ vec3 BasicTracer::color(const Ray& r, const HitObject& world, int depth) const
   return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
 }
 
+vec3 ReflectionTracer::color(const Ray& r, const HitObject& world, int depth) const
+{
+  HitRecord rec;
+
+  if (depth <= 0)
+    return vec3(0.f);
+
+  if (world.hit(r, {0.001f, std::numeric_limits<float>::max()}, rec)) {
+    Ray scattered;
+    vec3 attenuation;
+    if (rec.material->scatter(r, rec, attenuation, scattered))
+      return vec3(1.f);//attenuation * color(scattered, world, depth - 1);
+    return vec3(0.5f);
+  }
+
+  vec3 unit_dir = glm::normalize(r.direction());
+  float t = 0.5f * (unit_dir.y + 1.f);
+  return (1.f - t) * vec3(1.f) + t * vec3(0.5f, 0.7f, 1.f);
+}
+
 vec3 NormalTracer::color(const Ray& r, const HitObject& world, int depth) const
 {
   HitRecord rec;
