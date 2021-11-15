@@ -15,19 +15,23 @@ using std::unique_ptr;
 using std::make_unique;
 using glm::vec3;
 
-HitObject* book1_cover(bool with_bvh)
+HitObject* book1_cover(bool with_bvh, bool with_checkers_ground)
 {
   typedef ConstantTexture CT;
   typedef CheckersTexture CHKT;
 
   vector<HitObject*> objs;
 
-  auto checkers = make_unique<CheckersTexture>(make_unique<CT>(vec3(0.2f, 0.3f, 0.1f)),
-                                               make_unique<CT>(vec3(0.9f)));
+  Material* ground_mat;
+  if (with_checkers_ground)
+    ground_mat = new Lambertian(make_unique<CHKT>(make_unique<CT>(vec3(0.2f, 0.3f, 0.1f)),
+                                                  make_unique<CT>(vec3(0.9f))));
+  else
+    ground_mat = new Lambertian(make_unique<CT>(vec3(0.5f)));
 
   objs.push_back(new Sphere(vec3(0.f, -1000.f, 0.f),
                             1000.f,
-                            new Lambertian(std::move(checkers))));
+                            ground_mat));
 
   for(int a = -11; a < 11; ++a) {
     for (int b = -11; b < 11; ++b) {
