@@ -6,6 +6,8 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 
+#include <CLI/CLI.hpp>
+
 #include "aabb.h"
 #include "bvhnode.h"
 #include "camera.h"
@@ -27,17 +29,18 @@ using glm::vec3;
 
 int main(int argc, char** argv)
 {
+  CLI::App app{"Raytracing demo program"};
+
   const int N_CHANNELS = 3;
   int nx = 200;
   int ny = 100;
   int n_samples = 100;
 
-  if (argc > 1)
-    nx = atoi(argv[1]);
-  if (argc > 2)
-    ny = atoi(argv[2]);
-  if (argc > 3)
-    n_samples = atoi(argv[3]);
+  app.add_option("-x,--nx", nx, "Final image width in pixels.");
+  app.add_option("-y,--ny", ny, "Final image height in pixels.");
+  app.add_option("-s,--samples", n_samples, "Number of samples to cast per-pixel.");
+
+  CLI11_PARSE(app, argc, argv);
 
   auto light = new DiffuseLight(vec3(4.f));
   auto light2 = new DiffuseLight(vec3(5.f, 2.f, 2.f));
