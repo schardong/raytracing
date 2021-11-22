@@ -12,14 +12,12 @@ image: gcc
 
 build:
   stage: build
-  # instead of calling g++ directly you can also use some build toolkit like make
-  # install the necessary build tools when needed
   before_script:
     - apt update --yes && apt --yes install cmake
   script:
-    - wget https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip
-    - unzip glm-0.9.9.8.zip
-    - mkdir ext && mv glm/glm ext/
+#    - wget https://github.com/g-truc/glm/releases/download/0.9.9.8/glm-0.9.9.8.zip
+#    - unzip glm-0.9.9.8.zip
+#    - mkdir ext && mv glm/glm ext/
     - mkdir build && cd build
     - cmake ../
     - make -j
