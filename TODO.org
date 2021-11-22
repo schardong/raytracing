@@ -1,0 +1,9 @@
+#+TITLE: Raytracer TO-DO list
+#+AUTHOR: Guilherme G. Schardong
+#+DATE: 2021-11-22
+
+* Add support for loading scenes from file
+** Add JSON reading/writing support
+
+* Add tests for chapters of the books
+	May use the previous TO-DO point if we parameterize the tracer and scenes correctly
