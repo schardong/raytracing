@@ -31,7 +31,7 @@ target_include_directories(trace
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		${glm_SOURCE_DIR}
+        ${glm_SOURCE_DIR}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
@@ -43,9 +43,9 @@ target_include_directories(demo_rt
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
-	PUBLIC
-		${glm_SOURCE_DIR}
-		${cli11_SOURCE_DIR}
+    PUBLIC
+        ${glm_SOURCE_DIR}
+        ${cli11_SOURCE_DIR}/include
 )
 target_link_libraries(demo_rt trace)
 
@@ -55,8 +55,8 @@ target_include_directories(t_lambertian_spheres
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
-	PUBLIC
-		${glm_SOURCE_DIR}
+    PUBLIC
+        ${glm_SOURCE_DIR}
 )
 target_link_libraries(t_lambertian_spheres trace)
 
@@ -65,8 +65,8 @@ target_include_directories(t_normal_spheres
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
-	PUBLIC
-		${glm_SOURCE_DIR}
+    PUBLIC
+        ${glm_SOURCE_DIR}
 )
 target_link_libraries(t_normal_spheres trace)
 
@@ -75,7 +75,7 @@ target_include_directories(t_book1
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/ext
-	PUBLIC
-		${glm_SOURCE_DIR}
+    PUBLIC
+        ${glm_SOURCE_DIR}
 )
 target_link_libraries(t_book1 trace)
